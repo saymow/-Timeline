@@ -1,8 +1,15 @@
+import { Migration } from './migration.js'
+
 export class Timeline {
-  #pointer = null
+  /** @type {number} */
+  #pointer = 0
+  /** @type {any} */
+  data = null
+  /** @type {Migration[]} */
+  migrations = []
 
   set pointer(position) {
-    this.#pointer = _.clamp(position, 0, this.timeLine.length - 1)
+    this.#pointer = _.clamp(position, 0, this.migrations.length - 1)
   }
 
   get pointer() {
@@ -36,50 +43,88 @@ export class Timeline {
     this.descriptionEl = descriptionEl
     this.nextBtnEl = nextBtnEl
     this.backBtnEl = backBtnEl
-    this.timeLine = []
+    this.data = initialData
 
-    this.timelinePush = _.debounce(this.timelinePush, 50)
+    this.timelinePush = _.debounce(this.migrationsLatest, 50)
 
-    this.init(initialData)
+    this.init()
   }
 
-  init(initialData) {
-    this.backBtnEl.addEventListener('click', this.timeLineBack.bind(this))
-    this.nextBtnEl.addEventListener('click', this.timeLineNext.bind(this))
+  init() {
+    this.backBtnEl.addEventListener('click', this.migrationsBack.bind(this))
+    this.nextBtnEl.addEventListener('click', this.migrationsNext.bind(this))
     this.withDataBinding()
-
-    this.timelinePush(initialData)
+    this.syncView()
   }
 
   withDataBinding() {
-    const getFormData = () => ({
-      title: this.titleInputEl.value,
-      description: this.descriptionInputEl.value,
-    })
+    this.titleInputEl.addEventListener(
+      'input',
+      _.debounce((e) => {
+        const value = e.target.value
+        const previousValue = this.data.title
 
-    this.formEl.addEventListener('input', () => {
-      this.timelinePush(getFormData())
-    })
+        this.migrations.push(
+          new Migration(
+            value,
+            (data, title) => {
+              return { ...data, title }
+            },
+            previousValue,
+            (data, previousTitle) => {
+              return { ...data, title: previousTitle }
+            },
+          ),
+        )
+
+        this.migrationsLatest()
+      }),
+    )
+
+    this.descriptionInputEl.addEventListener(
+      'input',
+      _.debounce((e) => {
+        const value = e.target.value
+        const previousValue = this.data.description
+
+        this.migrations.push(
+          new Migration(
+            value,
+            (data, description) => {
+              return { ...data, description }
+            },
+            previousValue,
+            (data, previousDescription) => {
+              return { ...data, description: previousDescription }
+            },
+          ),
+        )
+
+        this.migrationsLatest()
+      }, 100),
+    )
   }
 
-  timelinePush(data) {
-    this.timeLine.push(data)
-    this.pointer = this.timeLine.length - 1
+  migrationsLatest() {
+    this.pointer = this.migrations.length - 1
+    this.data = this.migrations.at(this.pointer).execute(this.data)
     this.syncView()
   }
 
-  timeLineBack() {
-    this.pointer--
-    this.syncView()
-  }
-
-  timeLineNext() {
+  migrationsNext() {
     this.pointer++
+    this.data = this.migrations.at(this.pointer).execute(this.data)
+    this.syncView()
+  }
+
+  migrationsBack() {
+    this.pointer--
+    this.data = this.migrations.at(this.pointer).execute(this.data)
     this.syncView()
   }
 
   syncView() {
-    const { title, description } = this.timeLine.at(this.pointer)
+    const { title, description } = this.data
 
     this.syncInputs(title, description)
     this.syncCard(title, description)
@@ -109,6 +154,6 @@ export class Timeline {
   }
 
   isAtEnd() {
-    return this.#pointer === this.timeLine.length - 1
+    return this.#pointer === Math.max(this.migrations.length - 1, 0)
   }
 }
