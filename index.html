@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delta Changes</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="container">
+      <form>
+        <div class="input-block">
+          <label for="title-input">Title</label>
+          <input 
+            id="title-input"
+            data-id="title-input" 
+            placeholder="Title" 
+            type="text" 
+          />
+        </div>
+        <div class="input-block">
+          <label for="description-input">Description</label>
+          <input
+            id="description-input"
+            data-id="description-input"
+            placeholder="Description"
+            type="text"
+          />
+        </div>
+      </form>
+      <section>
+        <div class="controls-container">
+          <i class="fas fa-arrow-left" data-id="go-back"></i>
+          <span></span>
+          <i class="fas fa-arrow-right" data-id="go-next"></i>
+        </div>
+        <article>
+          <h1 data-id="title">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          </h1>
+          <p data-id="description">
+            Voluptatum laboriosam iure perspiciatis voluptate quam sequi et
+            dignissimos, dolore sit blanditiis. Quam nulla eius explicabo
+            voluptatibus assumenda dicta temporibus, perspiciatis neque.
+          </p>
+        </article>
+      </section>
+    </div>
+
+    <script src="index.js"></script>
+  </body>
+</html>
