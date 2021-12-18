@@ -1,15 +1,16 @@
-import { Migration } from './migration.js'
+import { MigrationsFactory } from './migrationsFactory.js'
 
+const with150msDebounce = (callback) => _.debounce(callback, 150)
 export class Timeline {
   /** @type {number} */
-  #pointer = 0
+  #pointer = -1
   /** @type {any} */
   data = null
   /** @type {Migration[]} */
   migrations = []
 
   set pointer(position) {
-    this.#pointer = _.clamp(position, 0, this.migrations.length - 1)
+    this.#pointer = _.clamp(position, -1, this.migrations.length - 1)
   }
 
   get pointer() {
@@ -60,67 +61,55 @@ export class Timeline {
   withDataBinding() {
     this.titleInputEl.addEventListener(
       'input',
-      _.debounce((e) => {
-        const value = e.target.value
-        const previousValue = this.data.title
-
-        this.migrations.push(
-          new Migration(
-            value,
-            (data, title) => {
-              return { ...data, title }
-            },
-            previousValue,
-            (data, previousTitle) => {
-              return { ...data, title: previousTitle }
-            },
-          ),
-        )
-
-        this.migrationsLatest()
-      }),
+      with150msDebounce((e) => this.onTitleChanges(e.target.value)),
     )
 
     this.descriptionInputEl.addEventListener(
       'input',
-      _.debounce((e) => {
-        const value = e.target.value
-        const previousValue = this.data.description
-
-        this.migrations.push(
-          new Migration(
-            value,
-            (data, description) => {
-              return { ...data, description }
-            },
-            previousValue,
-            (data, previousDescription) => {
-              return { ...data, description: previousDescription }
-            },
-          ),
-        )
-
-        this.migrationsLatest()
-      }, 100),
+      with150msDebounce((e) => this.onDescriptionChanges(e.target.value)),
     )
+  }
+
+  onTitleChanges(value) {
+    const previousValue = this.data.title
+
+    this.migrations.push(
+      MigrationsFactory.getInstance('title', value, previousValue),
+    )
+
+    this.migrationsLatest()
+  }
+
+  onDescriptionChanges(value) {
+    const previousValue = this.data.description
+
+    this.migrations.push(
+      MigrationsFactory.getInstance('description', value, previousValue),
+    )
+
+    this.migrationsLatest()
   }
 
   migrationsLatest() {
     this.pointer = this.migrations.length - 1
-    this.data = this.migrations.at(this.pointer).execute(this.data)
+    this.data = this.currentMigration().execute(this.data)
     this.syncView()
   }
 
   migrationsNext() {
     this.pointer++
-    this.data = this.migrations.at(this.pointer).execute(this.data)
+    this.data = this.currentMigration().execute(this.data)
     this.syncView()
   }
 
   migrationsBack() {
+    this.data = this.currentMigration().undo(this.data)
     this.pointer--
-    this.data = this.migrations.at(this.pointer).execute(this.data)
     this.syncView()
+  }
+
+  currentMigration() {
+    return this.migrations.at(this.pointer)
   }
 
   syncView() {
@@ -150,10 +139,10 @@ export class Timeline {
   }
 
   isAtStart() {
-    return this.#pointer === 0
+    return this.pointer === -1
   }
 
   isAtEnd() {
-    return this.#pointer === Math.max(this.migrations.length - 1, 0)
+    return this.pointer === this.migrations.length - 1
   }
 }
