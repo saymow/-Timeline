@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Delta Changes</title>
+    <title>Delta Timeline</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
   </head>
   <body>
     <div class="container">
-      <form>
+      <form data-id="form">
         <div class="input-block">
           <label for="title-input">Title</label>
           <input 
@@ -38,16 +39,14 @@
         </div>
         <article>
           <h1 data-id="title">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
           </h1>
           <p data-id="description">
-            Voluptatum laboriosam iure perspiciatis voluptate quam sequi et
-            dignissimos, dolore sit blanditiis. Quam nulla eius explicabo
-            voluptatibus assumenda dicta temporibus, perspiciatis neque.
           </p>
         </article>
       </section>
     </div>
+
+    
 
     <script src="index.js"></script>
   </body>

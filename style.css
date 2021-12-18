@@ -98,12 +98,16 @@ body {
 }
 
 .container section .controls-container i[disabled] {
+  pointer-events: none;
   opacity: 40%;
 }
 
 .container section article {
   width: 240px;
   height: 320px;
+  padding: 10px;
+
+  overflow: hidden;
 
   background: #fafafa;
 
@@ -111,6 +115,6 @@ body {
   border: 1px solid rgb(238, 236, 236);
 }
 
-.container section article {
-  padding: 10px;
+.container section article h1, .container section article p  {
+  word-wrap: break-word;   
 }
