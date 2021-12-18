@@ -14,30 +14,36 @@ const initialData = {
 }
 
 class App {
+  #pointer = null
+
+  set pointer(position) {
+    this.#pointer = _.clamp(position, 0, this.timeLine.length - 1)
+  }
+
+  get pointer() {
+    return this.#pointer
+  }
+
   constructor() {
-    this.pointer = null
     this.timeLine = []
 
     this.timelinePush = _.debounce(this.timelinePush, 50)
-
     this.init()
   }
 
   init() {
     backBtnEl.addEventListener('click', this.timeLineBack.bind(this))
     nextBtnEl.addEventListener('click', this.timeLineNext.bind(this))
-    this.withTwoWayDataBinding()
+    this.withDataBinding()
 
     this.timelinePush(initialData)
   }
 
-  withTwoWayDataBinding() {
-    const getFormData = () => {
-      return {
-        title: titleInputEl.value,
-        description: descriptionInputEl.value,
-      }
-    }
+  withDataBinding() {
+    const getFormData = () => ({
+      title: titleInputEl.value,
+      description: descriptionInputEl.value,
+    })
 
     formEl.addEventListener('input', () => {
       this.timelinePush(getFormData())
@@ -51,12 +57,12 @@ class App {
   }
 
   timeLineBack() {
-    this.pointer = Math.max(this.pointer - 1, 0)
+    this.pointer--
     this.syncView()
   }
 
   timeLineNext() {
-    this.pointer = Math.min(this.pointer + 1, this.timeLine.length - 1)
+    this.pointer++
     this.syncView()
   }
 
@@ -65,7 +71,7 @@ class App {
 
     this.syncInputs(title, description)
     this.syncCard(title, description)
-    this.syncControls()
+    this.syncControllers()
   }
 
   syncInputs(title, description) {
@@ -73,23 +79,25 @@ class App {
     descriptionInputEl.value = description
   }
 
-  syncCard(title, description) {  
+  syncCard(title, description) {
     titleEl.textContent = title
     descriptionEl.textContent = description
   }
 
-  syncControls() {
-    if (this.pointer === this.timeLine.length - 1) {
-      nextBtnEl.setAttribute('disabled', 'disabled')
-    } else {
-      nextBtnEl.removeAttribute('disabled')
-    }
+  syncControllers() {
+    if (this.isAtStart()) backBtnEl.setAttribute('disabled', 'disabled')
+    else backBtnEl.removeAttribute('disabled')
 
-    if (this.pointer === 0) {
-      backBtnEl.setAttribute('disabled', 'disabled')
-    } else {
-      backBtnEl.removeAttribute('disabled')
-    }
+    if (this.isAtEnd()) nextBtnEl.setAttribute('disabled', 'disabled')
+    else nextBtnEl.removeAttribute('disabled')
+  }
+
+  isAtStart() {
+    return this.#pointer === 0
+  }
+
+  isAtEnd() {
+    return this.#pointer === this.timeLine.length - 1
   }
 }
 
